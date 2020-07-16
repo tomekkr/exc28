@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Menedżer zadań</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+<body>
+<div class="mx-auto">
+    <h3 th:text="|Lista zadań:|"></h3>
+    <table class="table-sm col-md-8">
+        <thead class="thead-dark">
+        <tr>
+            <th>ID zadania</th>
+            <th>Nazwa zadania</th>
+            <th>Data utworzenia</th>
+            <th>Data ważności</th>
+            <th>Kategoria</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="task:${tasks}">
+            <td th:text="|${task.id}|"></td>
+            <td th:text="|${task.name}|"></td>
+            <td th:text="|${task.creationDate}|"></td>
+            <td th:text="|${task.expirationDate}|"></td>
+            <td th:text="|${task.category}|"></td>
+            <td th:text="|${task.status}|"></td>
+        </tr>
+        </tbody>
+    </table>
+    <br/>
+    <form method="get" th:action="@{/}">
+        <h3>Sortowanie:</h3>
+        <div class="form-group row col-md-9">
+            <label class="col-sm-1 col-form-label">Status:</label>
+            <div class="col-sm-">
+                <input type="radio" th:each="status: ${T(com.example.demo.model.Status).values()}"
+                       th:text="|${status} |" th:value="${status}" name="status"><br/>
+            </div>
+        </div>
+        <div class="form-group row col-md-9">
+            <label class="col-sm-1 col-form-label">Kategoria:</label>
+            <div class="col-sm-">
+                <input type="radio" th:each="category: ${T(com.example.demo.model.Category).values()}"
+                       th:text="|${category} |" th:value="${category}" name="category"><br/>
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <input type="submit" class="btn btn-primary" value="Wyświetl posortowane">
+            <a href="/"><input type="button" class="btn btn-primary" value="Wyświetl wszystko"></a>
+        </div>
+    </form>
+    <br/>
+    <form method="post" th:action="@{/add}" th:object="${task}">
+        <h3>Dodaj nowe zadanie:</h3>
+        <div class="form-group col-md-4">
+            <label for="name">Nazwa</label>
+            <input minlength="2" maxlength="70" required="required" class="form-control" th:field="*{name}" id="name"
+                   placeholder="Wpisz nazwę zadania">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="expirationDate">Data ważności</label>
+            <input type="date" required="required" class="form-control" th:field="*{expirationDate}"
+                   id="expirationDate">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="category">Kategoria</label>
+            <select required="required" th:field="*{category}" class="form-control" id="category">
+                <option th:each="category: ${T(com.example.demo.model.Category).values()}"
+                        th:text="${category}" th:value="${category}"></option>
+            </select>
+        </div>
+        <div class="form-group col-md-4">
+            <input type="submit" class="btn btn-primary" value="Dodaj">
+        </div>
+    </form>
+</div>
+</body>
+</html>
