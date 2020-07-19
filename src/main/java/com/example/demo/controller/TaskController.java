@@ -49,4 +49,12 @@ public class TaskController {
         taskService.add(task);
         return "redirect:/";
     }
+
+    @GetMapping("/update")
+    String changeTaskStatus(@RequestParam(required = false) Long id, Model model) {
+        Task taskById = taskService.findById(id);
+        taskService.changeStatus(taskById);
+        model.addAttribute("task", taskById);
+        return "update";
+    }
 }

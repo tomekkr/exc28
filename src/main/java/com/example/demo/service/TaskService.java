@@ -22,6 +22,22 @@ public class TaskService {
         entityManager.persist(task);
     }
 
+    @Transactional
+    public void changeStatus(Task task) {
+        if (task.getStatus() == Status.COMPLETED) {
+            task.setStatus(Status.TO_DO);
+        } else {
+            task.setStatus(Status.COMPLETED);
+        }
+        entityManager.persist(task);
+    }
+
+    public Task findById(Long id) {
+        TypedQuery<Task> query = entityManager.createQuery("SELECT t FROM Task t WHERE t.id=?1", Task.class);
+        query.setParameter(1, id);
+        return query.getSingleResult();
+    }
+
     public List<Task> findAll() {
         TypedQuery<Task> query = entityManager.createQuery("SELECT t FROM Task t ORDER BY t.expirationDate", Task.class);
         return query.getResultList();
