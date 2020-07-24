@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class TaskController {
@@ -24,21 +25,7 @@ public class TaskController {
 
     @GetMapping("/")
     String main(@RequestParam(required = false) Status status, @RequestParam(required = false) Category category, Model model) {
-        List<Task> tasks;
-        if (status != null) {
-            if (category != null) {
-                tasks = taskService.findAllByStatusAndCategory(status, category);
-            } else {
-                tasks = taskService.findAllByStatus(status);
-            }
-        } else {
-            if (category != null) {
-                tasks = taskService.findAllByCategory(category);
-            } else {
-                tasks = taskService.findAll();
-            }
-        }
-
+        List<Task> tasks = taskService.getTasks(status, category);
         model.addAttribute("tasks", tasks);
         model.addAttribute("task", new Task());
         return "home";
@@ -50,11 +37,16 @@ public class TaskController {
         return "redirect:/";
     }
 
-    @GetMapping("/update")
-    String changeTaskStatus(@RequestParam(required = false) Long id, Model model) {
-        Task taskById = taskService.findById(id);
-        taskService.changeStatus(taskById);
-        model.addAttribute("task", taskById);
-        return "update";
+    @GetMapping("/update/status")
+    String changeTaskStatus(@RequestParam Long id, Model model) {
+        Optional<Task> optionalTaskById = taskService.findById(id);
+        if (optionalTaskById.isPresent()) {
+            Task task = optionalTaskById.get();
+            taskService.changeStatus(task);
+            model.addAttribute("task", task);
+            return "update";
+        } else {
+            return "redirect:/";
+        }
     }
 }

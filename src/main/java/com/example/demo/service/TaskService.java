@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -29,13 +30,11 @@ public class TaskService {
         } else {
             task.setStatus(Status.COMPLETED);
         }
-        entityManager.persist(task);
+        entityManager.merge(task);
     }
 
-    public Task findById(Long id) {
-        TypedQuery<Task> query = entityManager.createQuery("SELECT t FROM Task t WHERE t.id=?1", Task.class);
-        query.setParameter(1, id);
-        return query.getSingleResult();
+    public Optional<Task> findById(Long id) {
+        return Optional.ofNullable(entityManager.find(Task.class, id));
     }
 
     public List<Task> findAll() {
@@ -43,22 +42,40 @@ public class TaskService {
         return query.getResultList();
     }
 
-    public List<Task> findAllByCategory(Category category) {
+    private List<Task> findAllByCategory(Category category) {
         TypedQuery<Task> query = entityManager.createQuery("SELECT t FROM Task t WHERE t.category=?1 ORDER BY t.expirationDate", Task.class);
         query.setParameter(1, category);
         return query.getResultList();
     }
 
-    public List<Task> findAllByStatus(Status status) {
+    private List<Task> findAllByStatus(Status status) {
         TypedQuery<Task> query = entityManager.createQuery("SELECT t FROM Task t WHERE t.status=?1 ORDER BY t.expirationDate", Task.class);
         query.setParameter(1, status);
         return query.getResultList();
     }
 
-    public List<Task> findAllByStatusAndCategory(Status status, Category category) {
+    private List<Task> findAllByStatusAndCategory(Status status, Category category) {
         TypedQuery<Task> query = entityManager.createQuery("SELECT t FROM Task t WHERE t.status=?1 AND t.category=?2 ORDER BY t.expirationDate", Task.class);
         query.setParameter(1, status);
         query.setParameter(2, category);
         return query.getResultList();
+    }
+
+    public List<Task> getTasks(Status status, Category category) {
+        List<Task> tasks;
+        if (status != null) {
+            if (category != null) {
+                tasks = findAllByStatusAndCategory(status, category);
+            } else {
+                tasks = findAllByStatus(status);
+            }
+        } else {
+            if (category != null) {
+                tasks = findAllByCategory(category);
+            } else {
+                tasks = findAll();
+            }
+        }
+        return tasks;
     }
 }
